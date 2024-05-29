@@ -1,0 +1,9 @@
+host: 127.0.0.1
+port: 8080
+sub: Order
+
+dbhost: localhost
+dbport: 5432
+dbname: wb0
+dbuser: oswyndel
+sslmode: disable
