@@ -4,10 +4,10 @@ import (
 	"log"
 	"os"
 
-	"github.com/RbPyer/WB0"
-	"github.com/RbPyer/WB0/pkg/handler"
-	"github.com/RbPyer/WB0/pkg/repository"
-	"github.com/RbPyer/WB0/pkg/service"
+	"github.com/RbPyer/WB0/internal/server"
+	"github.com/RbPyer/WB0/internal/handler"
+	"github.com/RbPyer/WB0/internal/repository"
+	"github.com/RbPyer/WB0/internal/service"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
@@ -39,8 +39,8 @@ func main() {
 	services := service.NewService(repos)
 	handlers := handler.NewHandler(services)
 
-	srv := new(project.Server)
-	if err := srv.Run(viper.GetString("port"), handlers.InitRouting()); err != nil {
+	srv := server.NewServer(viper.GetString("port"), handlers.InitRouting(), db)
+	if err := srv.Run(viper.GetString("sub")); err != nil {
 		log.Fatalf("error while starting http-server: %s", err.Error())
 	}
 }

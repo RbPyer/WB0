@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"github.com/RbPyer/WB0/pkg/service"
+	"github.com/RbPyer/WB0/internal/service"
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,7 +23,6 @@ func (h *Handler) InitRouting() *gin.Engine {
 	{
 		orders := api.Group("/orders") 
 		{
-			orders.POST("/", h.AddOrder)
 			orders.GET("/:id", h.GetOrders)
 		}
 
