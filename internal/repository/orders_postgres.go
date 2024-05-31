@@ -1,8 +1,10 @@
 package repository
 
 import (
-	"github.com/RbPyer/WB0/internal/models"
+	"encoding/json"
+	"fmt"
 	"github.com/jmoiron/sqlx"
+	"log"
 )
 
 type OrdersPostgres struct {
@@ -15,6 +17,12 @@ func NewOrdersPostgres(db *sqlx.DB) *OrdersPostgres {
 }
 
 
-func (r *OrdersPostgres) CreateOrder(order models.Order) (int, error) {
-	return 0, nil
+func (r *OrdersPostgres) CreateOrder(order_uid string, data json.RawMessage) error {
+	query := fmt.Sprintf("INSERT INTO %s (order_uid, order_data) VALUES($1, $2)", ordersTable)
+	row := r.db.QueryRow(query, order_uid, data)
+	if err := row.Err(); err != nil {
+		return err
+	}
+	log.Printf("A new record with uid <%s> was created in orders!", order_uid)
+	return nil
 }

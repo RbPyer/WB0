@@ -1,12 +1,12 @@
 package service
 
 import (
-	"github.com/RbPyer/WB0/internal/models"
 	"github.com/RbPyer/WB0/internal/repository"
+	"encoding/json"
 )
 
 type OrdersCRUD interface {
-	CreateOrder(order models.Order) (int, error)
+	CreateOrder(order_uid string, data json.RawMessage) error
 }
 
 

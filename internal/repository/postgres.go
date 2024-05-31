@@ -6,7 +6,9 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-
+const (
+	ordersTable = "orders"
+)
 
 
 type Config struct {

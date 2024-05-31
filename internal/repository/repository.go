@@ -1,13 +1,13 @@
 package repository
 
 import (
-	"github.com/RbPyer/WB0/internal/models"
+	"encoding/json"
 	"github.com/jmoiron/sqlx"
 )
 
 
 type OrdersCRUD interface {
-	CreateOrder(order models.Order) (int, error)
+	CreateOrder(order_uid string, data json.RawMessage) error
 }
 
 

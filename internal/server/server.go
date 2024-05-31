@@ -2,24 +2,24 @@ package server
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"net/http"
 	"time"
-	"encoding/json"
-	"github.com/RbPyer/WB0/internal/repository"
-	"github.com/jmoiron/sqlx"
+	"github.com/RbPyer/WB0/internal/service"
+	"github.com/RbPyer/WB0/internal/cache"
 	"github.com/nats-io/nats.go"
 )
 
 type Server struct {
 	httpServer *http.Server
-	cache map[string]string
+	cache *cache.Cache
 	js nats.JetStreamContext
-	db repository.Repository
+	services *service.Service
 
 }
 
-func NewServer(port string, handler http.Handler, db *sqlx.DB) *Server {
+func NewServer(port string, handler http.Handler, services *service.Service) *Server {
 	return &Server{
 		httpServer: &http.Server{
 			Addr:           "127.0.0.1:" + port,
@@ -28,8 +28,8 @@ func NewServer(port string, handler http.Handler, db *sqlx.DB) *Server {
 			ReadTimeout:    10 * time.Second,
 			WriteTimeout:   10 * time.Second,
 		},
-		db: *repository.NewRepository(db),
-		cache: make(map[string]string),
+		cache: cache.NewCache(),
+		services: services,
 	}
 }
 
@@ -45,7 +45,17 @@ func (s *Server) NatsSub(subject string) error{
 	}
 
 	if _, err := js.Subscribe("Order", func (msg *nats.Msg) {
-		log.Println(string(json.RawMessage(msg.Data)))
+		log.Printf("A new message in queque:\n\n%s\n\n", string(json.RawMessage(msg.Data)))
+		serializedData := make(map[string]interface{})
+		err := json.Unmarshal(msg.Data, &serializedData)
+		if err != nil {
+			log.Fatalf("Some errors while serializing data %s: %s", string(msg.Data), err.Error())
+		}
+		if err = s.services.CreateOrder(serializedData["order_uid"].(string), msg.Data); err != nil {
+			log.Fatalf("Some errors while creating order: %s", err.Error())
+		}
+		s.cache.Set(serializedData["order_uid"].(string), json.RawMessage(msg.Data))
+
 	}, nats.Durable("wb0")); err != nil {
 		return err
 	}
@@ -57,7 +67,7 @@ func (s *Server) NatsSub(subject string) error{
 
 func (s *Server) Run(subject string) error {
 	if err := s.NatsSub(subject); err != nil {
-		log.Fatalf("Problems with nats-streaming: %s", err.Error())
+		log.Fatalf("Problems with Nats Jetstream: %s", err.Error())
 	}
 	return s.httpServer.ListenAndServe()
 }

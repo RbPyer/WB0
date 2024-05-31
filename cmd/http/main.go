@@ -39,7 +39,7 @@ func main() {
 	services := service.NewService(repos)
 	handlers := handler.NewHandler(services)
 
-	srv := server.NewServer(viper.GetString("port"), handlers.InitRouting(), db)
+	srv := server.NewServer(viper.GetString("port"), handlers.InitRouting(), services)
 	if err := srv.Run(viper.GetString("sub")); err != nil {
 		log.Fatalf("error while starting http-server: %s", err.Error())
 	}
