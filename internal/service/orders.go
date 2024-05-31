@@ -17,3 +17,7 @@ func (s *OrderService) CreateOrder(order_uid string, data json.RawMessage) error
 	return s.repo.CreateOrder(order_uid, data)
 }
 
+
+func (s *OrderService) GetOrders() ([]json.RawMessage, error) {
+	return s.repo.GetOrders()
+}

@@ -1,17 +1,17 @@
 package handler
 
 import (
-	"github.com/RbPyer/WB0/internal/service"
+	"github.com/RbPyer/WB0/internal/cache"
 	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
-	services *service.Service
+	cache *cache.Cache
 }
 
 
-func NewHandler(services *service.Service) *Handler {
-	return &Handler{services: services}
+func NewHandler(cache *cache.Cache) *Handler {
+	return &Handler{cache: cache}
 }
 
 
@@ -23,7 +23,7 @@ func (h *Handler) InitRouting() *gin.Engine {
 	{
 		orders := api.Group("/orders") 
 		{
-			orders.GET("/:id", h.GetOrders)
+			orders.GET("/:order_uid", h.GetOrder)
 		}
 
 	}

@@ -8,6 +8,7 @@ import (
 
 type OrdersCRUD interface {
 	CreateOrder(order_uid string, data json.RawMessage) error
+	GetOrders() ([]json.RawMessage, error)
 }
 
 

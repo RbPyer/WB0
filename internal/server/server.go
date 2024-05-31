@@ -19,7 +19,7 @@ type Server struct {
 
 }
 
-func NewServer(port string, handler http.Handler, services *service.Service) *Server {
+func NewServer(port string, handler http.Handler, services *service.Service, cache *cache.Cache) *Server {
 	return &Server{
 		httpServer: &http.Server{
 			Addr:           "127.0.0.1:" + port,
@@ -28,8 +28,8 @@ func NewServer(port string, handler http.Handler, services *service.Service) *Se
 			ReadTimeout:    10 * time.Second,
 			WriteTimeout:   10 * time.Second,
 		},
-		cache: cache.NewCache(),
 		services: services,
+		cache: cache,
 	}
 }
 
@@ -62,6 +62,21 @@ func (s *Server) NatsSub(subject string) error{
 	log.Println("Nats JetStream was started...")
 	s.js = js
 	return nil
+}
+
+func (s *Server) CacheLoad() {
+	ordersData, err := s.services.GetOrders()
+	if err != nil {
+		log.Fatalf("Some error while preloading cache from database: %s", err.Error())
+	}
+	serializedData := make(map[string]interface{})
+	for _, record := range ordersData {
+		if err = json.Unmarshal(record, &serializedData); err != nil {
+			log.Fatalf("Some error while preloading cache with json.Unmarshal(): %s", err.Error())
+		}
+		s.cache.Set(serializedData["order_uid"].(string), record)
+	}
+	log.Printf("\n---\nCache was loaded with %d record(s).\n---\n", len(s.cache.Storage))
 }
 
 

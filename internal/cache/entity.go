@@ -4,7 +4,7 @@ import "sync"
 
 type Cache struct {
 	sync.RWMutex
-	storage map[string]Data
+	Storage map[string]Data
 }
 
 
@@ -15,6 +15,6 @@ type Data struct {
 
 func NewCache() *Cache {
 	return &Cache{
-		storage: make(map[string]Data),
+		Storage: make(map[string]Data),
 	}
 }

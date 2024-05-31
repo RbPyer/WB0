@@ -26,3 +26,24 @@ func (r *OrdersPostgres) CreateOrder(order_uid string, data json.RawMessage) err
 	log.Printf("A new record with uid <%s> was created in orders!", order_uid)
 	return nil
 }
+
+func (r *OrdersPostgres) GetOrders() ([]json.RawMessage, error) {
+	var response = make([]json.RawMessage, 0)
+	query := fmt.Sprintf("SELECT order_data FROM %s", ordersTable)
+	rows, err := r.db.Query(query)
+	if err != nil {
+		log.Fatalf("Some error while updating cache: %s", err)
+	}
+	
+	for rows.Next() {
+		var data json.RawMessage
+		if err = rows.Scan(&data); err != nil {
+			return nil, err
+		}
+		response = append(response, data)
+
+	}
+
+	return response, nil
+
+}
