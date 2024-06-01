@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"log"
+	"github.com/RbPyer/WB0/pkg/db"
 )
 
 type OrdersPostgres struct {
@@ -18,7 +19,7 @@ func NewOrdersPostgres(db *sqlx.DB) *OrdersPostgres {
 
 
 func (r *OrdersPostgres) CreateOrder(order_uid string, data json.RawMessage) error {
-	query := fmt.Sprintf("INSERT INTO %s (order_uid, order_data) VALUES($1, $2)", ordersTable)
+	query := fmt.Sprintf("INSERT INTO %s (order_uid, order_data) VALUES($1, $2)", db.OrdersTable)
 	row := r.db.QueryRow(query, order_uid, data)
 	if err := row.Err(); err != nil {
 		return err
@@ -29,7 +30,7 @@ func (r *OrdersPostgres) CreateOrder(order_uid string, data json.RawMessage) err
 
 func (r *OrdersPostgres) GetOrders() ([]json.RawMessage, error) {
 	var response = make([]json.RawMessage, 0)
-	query := fmt.Sprintf("SELECT order_data FROM %s", ordersTable)
+	query := fmt.Sprintf("SELECT order_data FROM %s", db.OrdersTable)
 	rows, err := r.db.Query(query)
 	if err != nil {
 		log.Fatalf("Some error while updating cache: %s", err)

@@ -1,10 +1,26 @@
 package cache
 
+import "sync"
+
+type Cache struct {
+	sync.RWMutex
+	Storage map[string]interface{}
+}
+
+
+
+
+func NewCache() *Cache {
+	return &Cache{
+		Storage: make(map[string]interface{}),
+	}
+}
+
 
 func (c *Cache) Set(k string, v interface{}) {
 	c.Lock()
 	defer c.Unlock()
-	c.Storage[k] = Data{Item: v}
+	c.Storage[k] = v
 }
 
 func (c *Cache) Get(k string) (interface{}, bool) {
@@ -14,7 +30,7 @@ func (c *Cache) Get(k string) (interface{}, bool) {
 	if !ok {
 		return nil, false
 	}
-	return record.Item, true
+	return record, true
 }
 
 

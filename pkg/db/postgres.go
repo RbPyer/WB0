@@ -1,4 +1,4 @@
-package repository
+package db
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	ordersTable = "orders"
+	OrdersTable = "orders"
 )
 
 
