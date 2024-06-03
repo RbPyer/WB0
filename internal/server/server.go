@@ -11,6 +11,7 @@ import (
 
 	"github.com/RbPyer/WB0/internal/cache"
 	"github.com/RbPyer/WB0/internal/service"
+	"github.com/RbPyer/WB0/internal/utils"
 	"github.com/jmoiron/sqlx"
 	"github.com/nats-io/nats.go"
 )
@@ -21,6 +22,7 @@ type Server struct {
 	nc *nats.Conn
 	services *service.Service
 	db *sqlx.DB
+	crudInterface OrdersCRUD
 
 }
 
@@ -36,6 +38,7 @@ func NewServer(port string, handler http.Handler, services *service.Service, cac
 		services: services,
 		cache: cache,
 		db: db,
+		crudInterface: &service.OrderService{},
 	}
 }
 
@@ -61,7 +64,7 @@ func (s *Server) NatsSub(subject string) error{
 }
 
 func (s *Server) CacheLoad() {
-	ordersData, err := s.services.GetOrders()
+	ordersData, err := GetOrders(s.services.DbService)
 	if err != nil {
 		log.Fatalf("Some error while preloading cache from database: %s", err.Error())
 	}
@@ -86,13 +89,20 @@ func (s *Server) Run(subject string) error {
 func (s *Server) natsHandler(msg *nats.Msg) {
 	log.Printf("A new message in queque:\n\n%s\n\n", string(json.RawMessage(msg.Data)))
 	serializedData := make(map[string]interface{})
+
 	err := json.Unmarshal(msg.Data, &serializedData)
 	if err != nil {
 		log.Fatalf("Some errors while serializing data %s: %s", string(msg.Data), err.Error())
 	}
-	if err = s.services.CreateOrder(serializedData["order_uid"].(string), msg.Data); err != nil {
+
+	if err := utils.ValidateData(serializedData); err != nil {
+		log.Fatalf("Some errors with data-validation : %s", err.Error())
+	}
+
+	if err := CreateOrder(s.services.DbService, serializedData["order_uid"].(string), msg.Data); err != nil {
 		log.Fatalf("Some errors while creating order: %s", err.Error())
 	}
+
 	s.cache.Set(serializedData["order_uid"].(string), json.RawMessage(msg.Data))
 
 }

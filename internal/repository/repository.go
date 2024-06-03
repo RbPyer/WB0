@@ -1,24 +1,17 @@
 package repository
 
 import (
-	"encoding/json"
 	"github.com/jmoiron/sqlx"
 )
 
 
-type OrdersCRUD interface {
-	CreateOrder(order_uid string, data json.RawMessage) error
-	GetOrders() ([]json.RawMessage, error)
-}
-
-
 type Repository struct {
-	OrdersCRUD
+	Db *OrdersPostgres
 }
 
 
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
-		OrdersCRUD: NewOrdersPostgres(db),
+		Db: NewOrdersPostgres(db),
 	}
 }

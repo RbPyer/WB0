@@ -6,18 +6,18 @@ import (
 )
 
 type OrderService struct {
-	repo repository.OrdersCRUD
+	repo *repository.Repository
 }
 
-func NewOrderService(repo repository.OrdersCRUD) *OrderService {
+func NewOrderService(repo *repository.Repository) *OrderService {
 	return &OrderService{repo: repo}
 }
 
 func (s *OrderService) CreateOrder(order_uid string, data json.RawMessage) error {
-	return s.repo.CreateOrder(order_uid, data)
+	return s.repo.Db.CreateOrder(order_uid, data)
 }
 
 
 func (s *OrderService) GetOrders() ([]json.RawMessage, error) {
-	return s.repo.GetOrders()
+	return s.repo.Db.GetOrders()
 }
