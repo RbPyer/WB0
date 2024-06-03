@@ -3,6 +3,7 @@ package utils
 import (
 	"errors"
 	"slices"
+	"log"
 )
 
 
@@ -23,7 +24,7 @@ func ValidateData(data map[string]any) error {
 		"date_created",
 		"oof_shard",
 	}
-	if checkKeys(data, required_params) {
+	if !checkKeys(data, required_params) {
 		return errors.New("not enough required params")
 	}
 
@@ -39,6 +40,7 @@ func checkKeys(data map[string]any, dataset []string) bool {
 		}
 	}
 
+	log.Println(counter)
 	return counter == len(dataset)
 
 }
